@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>7 Wonders Poängräknare</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      margin: 0;
+      background-color: #f4f4f4;
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    .player-form {
+      background-color: white;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    label {
+      display: block;
+      margin-top: 8px;
+    }
+
+    input[type="number"],
+    input[type="text"] {
+      width: 80px;
+      padding: 5px;
+      margin-left: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 10px 0;
+      font-size: 16px;
+      border: none;
+      background-color: #0077cc;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #005fa3;
+    }
+
+    .results {
+      background-color: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-top: 20px;
+    }
+
+    .expansions {
+      margin-bottom: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #eee;
+    }
+
+    @media (max-width: 600px) {
+      input[type="number"], input[type="text"] {
+        width: 100%;
+        margin: 5px 0;
+      }
+      label {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>7 Wonders Poängräknare</h1>
+  
+  <label for="numPlayers">Antal spelare:</label>
+  <input type="number" id="numPlayers" min="1" max="10" value="3">
+
+  <div class="expansions">
+    <label><input type="checkbox" id="useLeaders"> Använd *Leaders*</label>
+    <label><input type="checkbox" id="useCities"> Använd *Cities*</label>
+  </div>
+
+  <button onclick="generateForms()">Skapa formulär</button>
+
+  <form id="scoreForm"></form>
+
+  <button onclick="calculateScores()">Beräkna resultat</button>
+
+  <div class="results" id="results"></div>
+
+  <script>
+    function generateForms() {
+      const numPlayers = document.getElementById('numPlayers').value;
+      const useLeaders = document.getElementById('useLeaders').checked;
+      const useCities = document.getElementById('useCities').checked;
+
+      const form = document.getElementById('scoreForm');
+      form.innerHTML = '';
+
+      for (let i = 1; i <= numPlayers; i++) {
+        const playerDiv = document.createElement('div');
+        playerDiv.className = 'player-form';
+        let html = `
+          <h3>Spelare ${i}</h3>
+          <label>Namn: <input type="text" name="name${i}" /></label>
+          <label>Militär: <input type="number" name="military${i}" value="0" /></label>
+          <label>Mynt: <input type="number" name="coins${i}" value="0" /></label>
+          <label>Underverk: <input type="number" name="wonder${i}" value="0" /></label>
+          <label>Byggnader (blå): <input type="number" name="blue${i}" value="0" /></label>
+          <label>Guilds (lila): <input type="number" name="guilds${i}" value="0" /></label>
+          <fieldset>
+            <legend>Vetenskapspoäng</legend>
+            <label>Kompass: <input type="number" name="compass${i}" value="0" /></label>
+            <label>Tavla: <input type="number" name="tablet${i}" value="0" /></label>
+            <label>Redskap: <input type="number" name="gear${i}" value="0" /></label>
+          </fieldset>
+        `;
+
+        if (useLeaders) {
+          html += `<label>Leaders (vit): <input type="number" name="leaders${i}" value="0" /></label>`;
+        }
+        if (useCities) {
+          html += `<label>Cities (svart): <input type="number" name="cities${i}" value="0" /></label>`;
+        }
+
+        playerDiv.innerHTML = html;
+        form.appendChild(playerDiv);
+      }
+    }
+
+    function calculateSciencePoints(compass, tablet, gear) {
+      const setBonus = Math.min(compass, tablet, gear);
+      return compass ** 2 + tablet ** 2 + gear ** 2 + (setBonus * 7);
+    }
+
+    function calculateScores() {
+      const numPlayers = document.getElementById('numPlayers').value;
+      const useLeaders = document.getElementById('useLeaders').checked;
+      const useCities = document.getElementById('useCities').checked;
+
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '<h2>Resultat</h2>';
+
+      const scores = [];
+
+      for (let i = 1; i <= numPlayers; i++) {
+        const name = document.querySelector(`[name=name${i}]`).value || `Spelare ${i}`;
+        const military = parseInt(document.querySelector(`[name=military${i}]`).value) || 0;
+        const coins = parseInt(document.querySelector(`[name=coins${i}]`).value) || 0;
+        const wonder = parseInt(document.querySelector(`[name=wonder${i}]`).value) || 0;
+        const blue = parseInt(document.querySelector(`[name=blue${i}]`).value) || 0;
+        const guilds = parseInt(document.querySelector(`[name=guilds${i}]`).value) || 0;
+
+        const compass = parseInt(document.querySelector(`[name=compass${i}]`).value) || 0;
+        const tablet = parseInt(document.querySelector(`[name=tablet${i}]`).value) || 0;
+        const gear = parseInt(document.querySelector(`[name=gear${i}]`).value) || 0;
+        const science = calculateSciencePoints(compass, tablet, gear);
+
+        let leaders = 0;
+        let cities = 0;
+
+        if (useLeaders) {
+          leaders = parseInt(document.querySelector(`[name=leaders${i}]`).value) || 0;
+        }
+
+        if (useCities) {
+          cities = parseInt(document.querySelector(`[name=cities${i}]`).value) || 0;
+        }
+
+        const total = military + coins + wonder + blue + guilds + science + leaders + cities;
+
+        scores.push({ name, total });
+      }
+
+      scores.sort((a, b) => b.total - a.total);
+
+      resultsDiv.innerHTML += `
+        <table>
+          <thead>
+            <tr>
+              <th>Placering</th>
+              <th>Spelare</th>
+              <th>Poäng</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${scores.map((player, index) => `
+              <tr>
+                <td>${index + 1}</td>
+                <td>${player.name}</td>
+                <td>${player.total}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+  </script>
+</body>
+</html>
