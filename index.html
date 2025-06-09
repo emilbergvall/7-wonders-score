@@ -127,12 +127,13 @@
           <label>Mynt: <input type="number" name="coins${i}" value="0" /></label>
           <label>Underverk: <input type="number" name="wonder${i}" value="0" /></label>
           <label>Byggnader (blå): <input type="number" name="blue${i}" value="0" /></label>
+          <label>Handel (gul): <input type="number" name="yellow${i}" value="0" /></label>
           <label>Guilds (lila): <input type="number" name="guilds${i}" value="0" /></label>
           <fieldset>
             <legend>Vetenskapspoäng</legend>
-            <label>Kompass: <input type="number" name="compass${i}" value="0" /></label>
+            <label>Passare: <input type="number" name="compass${i}" value="0" /></label>
             <label>Tavla: <input type="number" name="tablet${i}" value="0" /></label>
-            <label>Redskap: <input type="number" name="gear${i}" value="0" /></label>
+            <label>Kugghjul: <input type="number" name="gear${i}" value="0" /></label>
           </fieldset>
         `;
 
@@ -148,9 +149,9 @@
       }
     }
 
-    function calculateSciencePoints(compass, tablet, gear) {
-      const setBonus = Math.min(compass, tablet, gear);
-      return compass ** 2 + tablet ** 2 + gear ** 2 + (setBonus * 7);
+    function calculateSciencePoints(passare, tavla, kugghjul) {
+      const setBonus = Math.min(passare, tavla, kugghjul);
+      return passare ** 2 + tavla ** 2 + kugghjul ** 2 + (setBonus * 7);
     }
 
     function calculateScores() {
@@ -169,6 +170,7 @@
         const coins = parseInt(document.querySelector(`[name=coins${i}]`).value) || 0;
         const wonder = parseInt(document.querySelector(`[name=wonder${i}]`).value) || 0;
         const blue = parseInt(document.querySelector(`[name=blue${i}]`).value) || 0;
+        const yellow = parseInt(document.querySelector(`[name=yellow${i}]`).value) || 0;
         const guilds = parseInt(document.querySelector(`[name=guilds${i}]`).value) || 0;
 
         const compass = parseInt(document.querySelector(`[name=compass${i}]`).value) || 0;
@@ -187,7 +189,7 @@
           cities = parseInt(document.querySelector(`[name=cities${i}]`).value) || 0;
         }
 
-        const total = military + coins + wonder + blue + guilds + science + leaders + cities;
+        const total = military + coins + wonder + blue + yellow + guilds + science + leaders + cities;
 
         scores.push({ name, total });
       }
